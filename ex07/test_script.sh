@@ -37,7 +37,7 @@ generate_separator() {
 }
 
 # Assign the longest test to a variable
-longest_test="$> ./ft_advanced_sort_string_tab \"apple\" \"apple\" \"banana\" \"banana\""
+longest_test="$> ./ft_advanced_sort_string_tab alpha \"apple\" \"apple\" \"banana\" \"banana\""
 # Add some padding for better visuals and generate the separator
 separator=$(generate_separator $((${#longest_test} + 2)))
 
@@ -53,20 +53,20 @@ format_args() {
 	echo "$formatted_args"
 }
 
-# Function to run a test and check the result
 run_test() {
+	local sort_type="$1"
+	shift
 	local args=("$@")
 	local expected="${args[-1]}"
 	unset 'args[-1]'
 
 	echo "$separator"
-	echo "$> ./ft_advanced_sort_string_tab $(format_args "${args[@]}")"
+	echo "$> ./ft_advanced_sort_string_tab $sort_type $(format_args "${args[@]}")"
 
-	output=$(./ft_advanced_sort_string_tab "${args[@]}")
+	output=$(./ft_advanced_sort_string_tab "$sort_type" "${args[@]}")
 
 	if [ "$output" == "$expected" ]; then
 		echo -e "${GREEN}Test passed${NC}"
-		#echo -e "-> Actual output:\n$output"
 		return 0
 	else
 		echo -e "${RED}Test failed${NC}"
@@ -79,26 +79,23 @@ run_test() {
 # Run tests
 all_tests_passed=true
 
-# Test: Single string argument
-run_test "abc" "abc" || all_tests_passed=false
-# Test: Multiple string arguments in alphabetical order
-run_test "a" "bb" "ccc" "a, bb, ccc" || all_tests_passed=false
-# Test: Multiple string arguments in reverse alphabetical order
-run_test "ccc" "bb" "a" "a, bb, ccc" || all_tests_passed=false
-# Test: Multiple string arguments in random order
-run_test "bb" "ccc" "a" "a, bb, ccc" || all_tests_passed=false
-# Test: Multiple string arguments not sorted
-run_test "banana" "cherry" "apple" "apple, banana, cherry" || all_tests_passed=false
-# Test: Multiple string arguments with duplicates
-run_test "apple" "apple" "banana" "banana" "apple, apple, banana, banana" || all_tests_passed=false
-# Test: Multiple string arguments with mixed case
-run_test "Banana" "apple" "Cherry" "Banana, Cherry, apple" || all_tests_passed=false
-# Test: Arguments multiples avec des caractères non imprimables
-run_test "abc" "$(printf '\x80')" "def" "$(printf '\xFF')" "abc, def, $(printf '\x80'), $(printf '\xFF')" || all_tests_passed=false
-# Test: All arguments are the same
-run_test "same" "same" "same" "same, same, same" || all_tests_passed=false
-# Test: NULL string argument
-run_test "NULL" "(null)" || all_tests_passed=false
+echo "Testing alphabetical sorting..."
+# Alphabetical sorting tests
+run_test "alpha" "abc" "abc" || all_tests_passed=false
+run_test "alpha" "a" "bb" "ccc" "a, bb, ccc" || all_tests_passed=false
+run_test "alpha" "ccc" "bb" "a" "a, bb, ccc" || all_tests_passed=false
+run_test "alpha" "bb" "ccc" "a" "a, bb, ccc" || all_tests_passed=false
+run_test "alpha" "banana" "cherry" "apple" "apple, banana, cherry" || all_tests_passed=false
+run_test "alpha" "apple" "apple" "banana" "banana" "apple, apple, banana, banana" || all_tests_passed=false
+run_test "alpha" "Banana" "apple" "Cherry" "Banana, Cherry, apple" || all_tests_passed=false
+run_test "alpha" "abc" "$(printf '\x80')" "def" "$(printf '\xFF')" "abc, def, $(printf '\x80'), $(printf '\xFF')" || all_tests_passed=false
+run_test "alpha" "same" "same" "same" "same, same, same" || all_tests_passed=false
+run_test "alpha" "NULL" "(null)" || all_tests_passed=false
+
+echo "Testing length-based sorting..."
+# Length-based sorting tests
+run_test "length" "Qeubj" "urS1f6q0" "qTuL5QBx" "mDJx5qQ" "XZOTtB" "lfw" "zt5" "3RgO" "OGMCixm0w" "wa2E" "qWr" "h" "F" "SOFL0tfczxW" "m" "IlR" \
+			"h, F, m, lfw, zt5, qWr, IlR, 3RgO, wa2E, Qeubj, XZOTtB, mDJx5qQ, urS1f6q0, qTuL5QBx, OGMCixm0w, SOFL0tfczxW" || all_tests_passed=false
 
 # Final result
 echo "$separator"
